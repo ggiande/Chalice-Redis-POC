@@ -1,5 +1,6 @@
 package com.mhg.app.chalice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -46,9 +47,18 @@ public class User {
     private String passwordConfirm;
 
     @Reference
+    @JsonIdentityReference(alwaysAsId = true)
     private Set<Role> roles = new HashSet<Role>();
 
     public void addRole(Role role) {
         roles.add(role);
+    }
+
+    @Reference
+    @JsonIdentityReference(alwaysAsId = true)
+    private Set<Book> books = new HashSet<Book>();
+
+    public void addBook(Book book) {
+        books.add(book);
     }
 }
