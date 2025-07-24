@@ -43,5 +43,4 @@ public class HelloRedisController {
 
         return new AbstractMap.SimpleEntry<String, String>(key, value);
     }
-
 }

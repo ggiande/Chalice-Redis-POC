@@ -47,15 +47,13 @@ public class CreateUsers implements CommandLineRunner {
             roleRepository.save(adminRole);
             log.info(">>>> 'customer' Role created and saved: {}", customerRole);
             log.info(">>>> 'admin' Role created and saved: {}", adminRole);
-        } else {
-            log.info(">>>> 'admin/customer' Role found: {}", customerRole);
         }
 
         if (userRepository.count() == 0) {
             // load the roles
             Role admin = roleRepository.findFirstByName("admin");
             Role customer = roleRepository.findFirstByName("customer");
-            log.info("Loaded admin {} and customer: {}", admin, customer);
+//            log.info("Loaded admin {} and customer: {}", admin, customer);
             try {
                 // create a Jackson object mapper
                 ObjectMapper mapper = new ObjectMapper();

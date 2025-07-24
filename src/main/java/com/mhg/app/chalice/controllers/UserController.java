@@ -23,11 +23,14 @@ public class UserController {
 
     @GetMapping
     public Iterable<User> all(@RequestParam(defaultValue = "") String email) {
-        log.info("Querying for User with email {}", email);
+        long startTime = System.currentTimeMillis(); // Millisecond precision
         if (email.isEmpty()) {
-            return userRepository.findAll();
+            Iterable<User> users = userRepository.findAll();
+            log.info("Finished processing in {} ms.", System.currentTimeMillis() - startTime);
+            return users;
         }
         Optional<User> user = Optional.ofNullable(userRepository.findFirstByEmail(email));
+        log.info("Finished processing in {} ms.", System.currentTimeMillis() - startTime);
         return user.isPresent() ? List.of(user.get()) : Collections.emptyList();
     }
 }
