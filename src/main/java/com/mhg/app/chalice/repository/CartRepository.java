@@ -45,6 +45,7 @@ public class CartRepository implements CrudRepository<Cart, String> {
         return template.opsForHash();
     }
 
+    // TESTED
     @Override
     public <S extends Cart> S save(S cart) {
         // set cart id
@@ -60,6 +61,7 @@ public class CartRepository implements CrudRepository<Cart, String> {
         return cart;
     }
 
+    // TESTED
     @Override
     public <S extends Cart> Iterable<S> saveAll(Iterable<S> carts) {
         return StreamSupport.stream(carts.spliterator(), false).map(cart -> save(cart)).collect(Collectors.toList());
