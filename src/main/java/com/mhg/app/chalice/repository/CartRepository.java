@@ -65,6 +65,7 @@ public class CartRepository implements CrudRepository<Cart, String> {
         return StreamSupport.stream(carts.spliterator(), false).map(cart -> save(cart)).collect(Collectors.toList());
     }
 
+    // TESTED
     // jedisPooled.jsonGet("cart:abc-123", new Path2("$.items[0].productId")) // this is what path introduces
     @Override
     public Optional<Cart> findById(String id) {
@@ -76,11 +77,13 @@ public class CartRepository implements CrudRepository<Cart, String> {
         return Optional.ofNullable(cart);
     }
 
+    // TESTED
     @Override
     public boolean existsById(String id) {
         return template.hasKey(getKey(id));
     }
 
+    // TESTED
     @Override
     public Iterable<Cart> findAll() {
         String[] keys = redisSets().members(idPrefix).stream().toArray(String[]::new);
@@ -100,6 +103,7 @@ public class CartRepository implements CrudRepository<Cart, String> {
         return carts;
     }
 
+    // TESTED
     @Override
     public Iterable<Cart> findAllById(Iterable<String> ids) {
         String[] keys = StreamSupport.stream(ids.spliterator(), false)
@@ -120,35 +124,50 @@ public class CartRepository implements CrudRepository<Cart, String> {
         return carts;
     }
 
+    // TESTED
     @Override
     public long count() {
         Long sizeIdPrefix = redisSets().size(idPrefix);
         return (sizeIdPrefix != null) ? sizeIdPrefix : -1;
     }
 
+    // TESTED
     @Override
     public void deleteById(String id) {
         jedisPooled.del(getKey(id));
+        Long removedCount = redisSets().remove(idPrefix, getKey(id));
+        if (removedCount != null && removedCount > 0) {
+            log.info("Successfully removed {} member(s) from set '{}'.", removedCount, getKey(id));
+        } else {
+            log.warn("No members found or removed from set '{}' for the provided carts.", getKey(id));
+        }
     }
 
+    // TESTED
     @Override
     public void delete(Cart cart) {
         deleteById(cart.getId());
     }
 
+    // TESTED
     @Override
     public void deleteAllById(Iterable<? extends String> keys) {
         Set<String> keySet = StreamSupport.stream(keys.spliterator(), false)
                 .collect(Collectors.toSet());
-        log.info("deleting for keyset {}", keySet);
-        redisSets().getOperations().delete(keySet);
+        Long removedCount = redisSets().remove(idPrefix, keySet.toArray());
+        if (removedCount != null && removedCount > 0) {
+            log.info("Successfully removed {} member(s) from set '{}'.", removedCount, keys);
+        } else {
+            log.warn("No members found or removed from set '{}' for the provided carts.", keys);
+        }
     }
 
+    // TESTED
     @Override
     public void deleteAll(Iterable<? extends Cart> carts) {
         List<String> keys = StreamSupport //
                 .stream(carts.spliterator(), false) //
-                .map(cart -> idPrefix + cart.getId()) //
+                .map(cart -> String.format("%s:%s", idPrefix, cart.getId())) //
                 .toList();
         Long removedCount = redisSets().remove(idPrefix, keys.toArray());
         if (removedCount != null && removedCount > 0) {
@@ -158,6 +177,7 @@ public class CartRepository implements CrudRepository<Cart, String> {
         }
     }
 
+    // TESTED
     @Override
     public void deleteAll() {
         Boolean deleted = redisSets().getOperations().delete(idPrefix); // Or just redisOperations.delete(setKey);
@@ -169,17 +189,19 @@ public class CartRepository implements CrudRepository<Cart, String> {
         }
     }
 
+    // TESTED
     public Optional<Cart> findByUserId(Long id) {
         String cartId = redisHash().get("carts-by-user-id-idx", id.toString());
         return (cartId != null) ? findById(cartId) : Optional.empty();
     }
 
+    // TESTED
     public static String getKey(Cart cart) {
         return String.format("%s:%s", idPrefix, cart.getId());
     }
 
+    // TESTED
     public static String getKey(String id) {
         return String.format("%s:%s", idPrefix, id);
     }
-
 }
