@@ -45,7 +45,7 @@ public class CreateAuthorNameSuggestions implements CommandLineRunner {
             RedisModulesAsyncCommands<String, String> commands = connection.async();
 
             if (!redisTemplate.hasKey(autoCompleteKey)) {
-                log.info("Auto-complete key '{}' not found. Populating suggestions...", autoCompleteKey);
+                log.info("CreateAuthorNameSuggestions::Everytime at start - Auto-complete key '{}' not found. Populating suggestions...", autoCompleteKey);
                 List<RedisFuture<Long>> futures = new ArrayList<>(); // To collect all async results
 
                 bookRepository.findAll().forEach(book -> {
@@ -67,7 +67,7 @@ public class CreateAuthorNameSuggestions implements CommandLineRunner {
                 log.info("Successfully populated auto-complete suggestions into key '{}'. Total suggestions added (approx): {}", autoCompleteKey, futures.size());
 
             } else {
-                log.info("Auto-complete key '{}' already exists. Skipping population.", autoCompleteKey);
+                log.info("CreateAuthorNameSuggestions::Everytime at start - Auto-complete key '{}' already exists. Skipping population.", autoCompleteKey);
             }
 
         } catch (ExecutionException e) {

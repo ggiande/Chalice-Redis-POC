@@ -39,11 +39,11 @@ public class CreateBooksSearchIndex implements CommandLineRunner {
     public void run(String... args) throws Exception {
         try (StatefulRedisModulesConnection<String, String> connection = pool.borrowObject()) {
             RedisModulesAsyncCommands<String, String> commands = connection.async();
-            log.info("CreateBooksSearchIndex Created a connection executing search for index {}", searchIndexName);
+            log.info("CreateBooksSearchIndex::BookSearchIndex Everytime at start - Created a connection executing search for index {}", searchIndexName);
             try {
                 // This call to .get() is correctly placed.
                 List<Object> ftInfoResult = commands.ftInfo(searchIndexName).get(MAX_TIMEOUT, TimeUnit.SECONDS);
-                log.info(">>>> Books Search Index '{}' already exists. Info: {}", searchIndexName, ftInfoResult);
+                log.info("CreateBooksSearchIndex::BookSearchIndex Everytime at start - Books Search Index '{}' already exists. Info: {}", searchIndexName, ftInfoResult);
             } catch (ExecutionException e) {
                 // This is the primary catch for exceptions from .get()
                 Throwable cause = e.getCause();

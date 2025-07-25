@@ -92,6 +92,7 @@ public class BookController {
 
     @GetMapping("/search")
     public SearchResults<String, String> search(@RequestParam(name = "q") String query) throws Exception {
+        long startTime = System.currentTimeMillis(); // Millisecond precision
         try (StatefulRedisModulesConnection<String, String> connection = pool.borrowObject()) {
             RedisModulesAsyncCommands<String, String> commands = connection.async();
             log.info("Executing search for index {} with query '{}'", searchIndexName, query);
@@ -100,12 +101,14 @@ public class BookController {
                 RedisFuture<SearchResults<String, String>> futureResults = commands.ftSearch(searchIndexName, query);
                 SearchResults<String, String> results = futureResults.get(5, TimeUnit.SECONDS); // Specify a timeout
                 log.info(">>>> Search for query '{}' on index '{}' returned results {}", query, searchIndexName, results);
+                log.info("Finished processing in {} ms.", System.currentTimeMillis() - startTime);
                 return results;
             } catch (RedisCommandExecutionException rcee) {
                 // This correctly catches the direct execution exception from the synchronous command
                 if (rcee.getMessage() != null && rcee.getMessage().equalsIgnoreCase("Unknown index name")) {
                     log.error("Search failed: Redis Search Index '{}' does not exist. Please ensure it is created and data is indexed.", searchIndexName);
                     // Decide your recovery action:
+                    log.info("Finished processing in {} ms.", System.currentTimeMillis() - startTime);
                     return new SearchResults<>(); // Option 1: Return empty results gracefully
                     // throw new IndexNotFoundException("Redis Search index not found: " + searchIndexName, rcee); // Option 2: Throw custom app exception
                 } else {
@@ -127,6 +130,7 @@ public class BookController {
 
     @GetMapping("/authors")
     public List<Suggestion<String>> authorAutoComplete(@RequestParam(name = "q") String query) {
+        long startTime = System.currentTimeMillis(); // Millisecond precision
         try (StatefulRedisModulesConnection<String, String> connection = pool.borrowObject()) {
             RedisModulesAsyncCommands<String, String> commands = connection.async();
             log.info("Executing autocomplete search on key '{}' for query '{}'", autoCompleteKey, query);
@@ -141,8 +145,8 @@ public class BookController {
                 List<Suggestion<String>> suggestions = suggestionFuture.get(5, TimeUnit.SECONDS); // 5 seconds timeout for this operation
 
                 log.info(">>>> Autocomplete for query '{}' on key '{}' returned {} results.", query, autoCompleteKey, suggestions.size());
+                log.info("Finished processing in {} ms.", System.currentTimeMillis() - startTime);
                 return suggestions; // Return the correct type
-
             } catch (ExecutionException e) {
                 // This block correctly catches the ExecutionException thrown by .get()
                 Throwable cause = e.getCause(); // Get the underlying cause of the ExecutionException
@@ -153,6 +157,7 @@ public class BookController {
                     // FT.SUGGET generally doesn't throw "Unknown index name" but "Unknown key" if the suggester key doesn't exist
                     if (rcee.getMessage() != null && rcee.getMessage().contains("Unknown key")) {
                         log.error("Autocomplete failed: Redis Suggester Key '{}' does not exist. Please ensure it is created and populated with data.", autoCompleteKey);
+                        log.info("Finished processing in {} ms.", System.currentTimeMillis() - startTime);
                         return new ArrayList<>(); // Option 1: Return empty list gracefully
                     } else {
                         // Handle other specific command execution errors (e.g., general Redis issues)

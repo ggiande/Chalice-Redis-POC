@@ -18,7 +18,6 @@ public class CreateRoles implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        log.info("roleRepository.count() {}", roleRepository.findAll());
         if (roleRepository.count() == 0) {
             Role adminRole = Role.builder().name("admin").build();
             Role customerRole = Role.builder().name("customer").build();

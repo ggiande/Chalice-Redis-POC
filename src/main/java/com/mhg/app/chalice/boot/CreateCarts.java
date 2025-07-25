@@ -42,14 +42,8 @@ public class CreateCarts implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        "{\"id\":\"fc40ca65-4054-4169-bd38-65db57adb6bd\",\"userId\":\"-1111336141452526205\",\"cartItems\":[{\"isbn\":\"3864911273\",\"price\":28.99,\"quantity\":1},{\"isbn\":\"3319626361\",\"price\":127.2,\"quantity\":1}]}"        Cart smallCart = Cart.builder().userId("7626603532691436396").id("28ae116d-38b1-4cac-ab39-204e7a34a829").build();
-//        Cart smallCart = Cart.builder().id("fc40ca65-4054-4169-bd38-65db57adb6bd").userId("-1111336141452526205").build();
-//        cartRepository.deleteAll();
-//        log.info("carted {}", carted);
-//        if (!carted.isEmpty()) {
-//            log.info("cart! {}", carted);
-//        }
         if (cartRepository.count() == 0) {
+            log.info("CreateCarts::Creating Carts in some users");
             Random random = new Random();
 
             // loops for the number of carts to create
