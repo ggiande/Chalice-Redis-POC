@@ -51,6 +51,7 @@ public class ChaliceApplication {
 
     @Value("${spring.redis.timeout:2000}") // Connection timeout in milliseconds
     private int redisTimeout;
+
     @Bean
     public JedisPooled jedisPooled() {
         // Build the HostAndPort for your Redis instance
