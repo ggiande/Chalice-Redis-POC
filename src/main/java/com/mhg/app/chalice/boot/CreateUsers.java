@@ -50,6 +50,7 @@ public class CreateUsers implements CommandLineRunner {
         }
 
         if (userRepository.count() == 0) {
+            log.info(">>>> CreateUsers | Inserting Users");
             // load the roles
             Role admin = roleRepository.findFirstByName("admin");
             Role customer = roleRepository.findFirstByName("customer");
@@ -72,9 +73,9 @@ public class CreateUsers implements CommandLineRunner {
                             user.addRole(customer);
                     userRepository.save(user);
                 });
-                log.info(">>>> {} Users Saved!", users.size());
+                log.info(">>>> CreateUsers | {} Users Saved!", users.size());
             } catch (IOException e) {
-                log.info(">>>> Unable to import users: {}",  e.getMessage());
+                log.info(">>>> CreateUsers | Unable to import users: {}",  e.getMessage());
             }
 
             User adminUser = new User();

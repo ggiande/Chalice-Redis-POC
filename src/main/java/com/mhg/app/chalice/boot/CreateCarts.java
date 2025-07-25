@@ -43,7 +43,7 @@ public class CreateCarts implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (cartRepository.count() == 0) {
-            log.info("CreateCarts::Creating Carts in some users");
+            log.info(">>>> CreateCarts | Creating Carts in some users");
             Random random = new Random();
 
             // loops for the number of carts to create
@@ -81,7 +81,7 @@ public class CreateCarts implements CommandLineRunner {
         Set<Book> books = new HashSet<Book>();
         IntStream.range(1, howMany).forEach(n -> {
             String randomBookId = redisTemplate.opsForSet().randomMember(Book.class.getSimpleName());
-            log.info("randomBookId {}", randomBookId);
+//            log.info("randomBookId {}", randomBookId);
             books.add(bookRepository.findById(randomBookId));
         });
 
@@ -98,7 +98,6 @@ public class CreateCarts implements CommandLineRunner {
                     .build();
             items.add(item);
         });
-
         return items;
     }
 }

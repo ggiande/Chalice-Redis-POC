@@ -45,7 +45,7 @@ public class CreateAuthorNameSuggestions implements CommandLineRunner {
             RedisModulesAsyncCommands<String, String> commands = connection.async();
 
             if (!redisTemplate.hasKey(autoCompleteKey)) {
-                log.info("CreateAuthorNameSuggestions::Everytime at start - Auto-complete key '{}' not found. Populating suggestions...", autoCompleteKey);
+                log.info(">>>> CreateAuthorNameSuggestions | Everytime at start - Auto-complete key '{}' not found. Populating suggestions...", autoCompleteKey);
                 List<RedisFuture<Long>> futures = new ArrayList<>(); // To collect all async results
 
                 bookRepository.findAll().forEach(book -> {
@@ -64,10 +64,10 @@ public class CreateAuthorNameSuggestions implements CommandLineRunner {
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                         .get(60, TimeUnit.SECONDS); // 60 seconds timeout for all adds
 
-                log.info("Successfully populated auto-complete suggestions into key '{}'. Total suggestions added (approx): {}", autoCompleteKey, futures.size());
+                log.info(">>>> CreateAuthorNameSuggestions | Successfully populated auto-complete suggestions into key '{}'. Total suggestions added (approx): {}", autoCompleteKey, futures.size());
 
             } else {
-                log.info("CreateAuthorNameSuggestions::Everytime at start - Auto-complete key '{}' already exists. Skipping population.", autoCompleteKey);
+                log.info(">>>> CreateAuthorNameSuggestions | Everytime at start - Auto-complete key '{}' already exists. Skipping population.", autoCompleteKey);
             }
 
         } catch (ExecutionException e) {
@@ -76,34 +76,34 @@ public class CreateAuthorNameSuggestions implements CommandLineRunner {
 
             if (cause instanceof RedisCommandExecutionException) {
                 RedisCommandExecutionException rcee = (RedisCommandExecutionException) cause;
-                log.error("Redis command execution error during auto-complete population for key '{}': {}. Details: {}", autoCompleteKey, rcee.getMessage(), rcee.getClass().getSimpleName(), rcee);
+                log.error(">>>> CreateAuthorNameSuggestions | Redis command execution error during auto-complete population for key '{}': {}. Details: {}", autoCompleteKey, rcee.getMessage(), rcee.getClass().getSimpleName(), rcee);
                 // FT.SUGADD typically won't throw "Unknown index name" unless autoCompleteKey itself is an index name
                 // (which it shouldn't be for FT.SUGADD). Other common errors might be invalid arguments or Redis issues.
             } else {
                 // Catches other causes of ExecutionException (e.g., non-Redis specific issues)
-                log.error("Asynchronous operation failed during auto-complete population for key '{}' due to unexpected cause: {}. Details: {}", autoCompleteKey, e.getMessage(), cause != null ? cause.getClass().getSimpleName() : "N/A", e);
+                log.error(">>>> CreateAuthorNameSuggestions | Asynchronous operation failed during auto-complete population for key '{}' due to unexpected cause: {}. Details: {}", autoCompleteKey, e.getMessage(), cause != null ? cause.getClass().getSimpleName() : "N/A", e);
             }
             // Rethrow as RuntimeException to prevent application startup if this is critical
-            throw new RuntimeException("Failed to populate auto-complete suggestions during startup", e);
+            throw new RuntimeException(">>>> CreateAuthorNameSuggestions | Failed to populate auto-complete suggestions during startup", e);
 
         } catch (InterruptedException e) {
             // Catches if the current thread was interrupted while waiting for the futures
-            log.error("Auto-complete population interrupted for key '{}': {}", autoCompleteKey, e.getMessage(), e);
+            log.error(">>>> CreateAuthorNameSuggestions | Auto-complete population interrupted for key '{}': {}", autoCompleteKey, e.getMessage(), e);
             Thread.currentThread().interrupt(); // Restore interrupted status
-            throw new RuntimeException("Auto-complete population interrupted during startup", e);
+            throw new RuntimeException(">>>> CreateAuthorNameSuggestions | Auto-complete population interrupted during startup", e);
 
         } catch (TimeoutException e) {
             // Catches if the entire batch operation timed out
-            log.error("Auto-complete population timed out after {} seconds for key '{}': {}", 60, autoCompleteKey, e.getMessage(), e);
-            throw new RuntimeException("Auto-complete population timed out during startup", e);
+            log.error(">>>> CreateAuthorNameSuggestions | Auto-complete population timed out after {} seconds for key '{}': {}", 60, autoCompleteKey, e.getMessage(), e);
+            throw new RuntimeException(">>>> CreateAuthorNameSuggestions | Auto-complete population timed out during startup", e);
 
         } catch (Exception e) {
             // This final catch block catches any other unexpected exceptions:
             // - Failures from `pool.borrowObject()`
             // - Exceptions from `bookRepository.findAll()` or `forEach` loops
             // - Any other unhandled synchronous exceptions within the try block
-            log.error("Failed to obtain connection from pool or an unexpected error occurred during auto-complete population for key '{}': {}", autoCompleteKey, e.getMessage(), e);
-            throw new RuntimeException("Could not complete auto-complete population during startup", e);
+            log.error(">>>> CreateAuthorNameSuggestions | Failed to obtain connection from pool or an unexpected error occurred during auto-complete population for key '{}': {}", autoCompleteKey, e.getMessage(), e);
+            throw new RuntimeException(">>>> CreateAuthorNameSuggestions | Could not complete auto-complete population during startup", e);
         }
     }
 }

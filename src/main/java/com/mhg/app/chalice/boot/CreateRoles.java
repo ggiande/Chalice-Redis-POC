@@ -23,7 +23,7 @@ public class CreateRoles implements CommandLineRunner {
             Role customerRole = Role.builder().name("customer").build();
             roleRepository.save(adminRole);
             roleRepository.save(customerRole);
-            log.info(">>>> Created admin and customer roles...");
+            log.info(">>>> CreateRoles | Created admin and customer roles");
         }
     }
 }

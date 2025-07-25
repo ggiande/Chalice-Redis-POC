@@ -36,49 +36,48 @@ public class CreateBooks implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (bookRepository.count() == 0) {
-            log.info("CreateBooks::Inserting Books");
-            ObjectMapper mapper = new ObjectMapper();
-            TypeReference<List<Book>> typeReference = new TypeReference<List<Book>>() {
-            };
-
-            List<File> files = //
-                    Files.list(Paths.get(getClass().getResource("/data/books").toURI())) //
-                            .filter(Files::isRegularFile) //
-                            .filter(path -> path.toString().endsWith(".json")) //
-                            .map(java.nio.file.Path::toFile) //
-                            .collect(Collectors.toList());
-
-            Map<String, Category> categories = new HashMap<String, Category>();
-
-            files.forEach(file -> {
-                try {
-                    log.info(">>>> Processing Book File: " + file.getPath());
-                    String categoryName = file.getName().substring(0, file.getName().lastIndexOf("_"));
-                    log.info(">>>> Category: " + categoryName);
-
-                    Category category;
-                    if (!categories.containsKey(categoryName)) {
-                        category = Category.builder().name(categoryName).build();
-                        categoryRepository.save(category);
-                        categories.put(categoryName, category);
-                    } else {
-                        category = categories.get(categoryName);
-                    }
-
-                    InputStream inputStream = new FileInputStream(file);
-                    List<Book> books = mapper.readValue(inputStream, typeReference);
-                    books.stream().forEach((book) -> {
-                        book.addCategory(category);
-                        bookRepository.save(book);
-                    });
-                    log.info(">>>> " + books.size() + " Books Saved!");
-                } catch (IOException e) {
-                    log.info("Unable to import books: " + e.getMessage());
-                }
-            });
-
-            log.info(">>>> Loaded Book Data and Created books...");
+        if (bookRepository.count() != 0) {
+            return;
         }
+        log.info(">>>> CreateBooks | Inserting Books");
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<List<Book>> typeReference = new TypeReference<List<Book>>() {
+        };
+
+        List<File> files = //
+                Files.list(Paths.get(getClass().getResource("/data/books").toURI())) //
+                        .filter(Files::isRegularFile) //
+                        .filter(path -> path.toString().endsWith(".json")) //
+                        .map(java.nio.file.Path::toFile) //
+                        .collect(Collectors.toList());
+
+        Map<String, Category> categories = new HashMap<String, Category>();
+        files.forEach(file -> {
+            try {
+//                log.info(">>>> CreateBooks | Processing Book File: " + file.getPath());
+                String categoryName = file.getName().substring(0, file.getName().lastIndexOf("_"));
+//                log.info(">>>> CreateBooks | Category: " + categoryName);
+
+                Category category;
+                if (!categories.containsKey(categoryName)) {
+                    category = Category.builder().name(categoryName).build();
+                    categoryRepository.save(category);
+                    categories.put(categoryName, category);
+                } else {
+                    category = categories.get(categoryName);
+                }
+
+                InputStream inputStream = new FileInputStream(file);
+                List<Book> books = mapper.readValue(inputStream, typeReference);
+                books.stream().forEach((book) -> {
+                    book.addCategory(category);
+                    bookRepository.save(book);
+                });
+                log.info(">>>> CreateBooks | {} Books Saved!", books.size());
+            } catch (IOException e) {
+                log.error(">>>> CreateBooks | Unable to import books: {}", e.getMessage());
+            }
+        });
+        log.info(">>>> CreateBooks | Loaded Book Data and Created books...");
     }
 }

@@ -56,7 +56,7 @@ public class CartRepository implements CrudRepository<Cart, String> {
         String jsonString = GSON.toJson(cart); // Serialize POJO to JSON string
         jedisPooled.jsonSet(key, Path2.ROOT_PATH, jsonString);
         redisSets().add(idPrefix, key);
-        log.info("cart user id {} cart id {}", cart.getUserId(), cart.getId());
+//        log.info("cart user id {} cart id {}", cart.getUserId(), cart.getId());
         redisHash().put("carts-by-user-id-idx", cart.getUserId(), cart.getId());
         return cart;
     }

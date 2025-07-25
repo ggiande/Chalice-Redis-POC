@@ -35,7 +35,7 @@ public class CreateBookRatings implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (bookRatingRepo.count() == 0) {
-            log.info("CreateBookRatings::Inserting Book Ratings");
+            log.info(">>>> CreateBookRatings | Inserting Book Ratings");
             Random random = new Random();
             IntStream.range(0, numberOfRatings).forEach(n -> {
                 String bookId = redisTemplate.opsForSet().randomMember(Book.class.getName());
@@ -54,7 +54,7 @@ public class CreateBookRatings implements CommandLineRunner {
                         .rating(stars).build();
                 bookRatingRepo.save(rating);
             });
-            log.info(">>>> BookRating created...");
+            log.info(">>>> CreateBookRatings | BookRating created...");
         }
     }
 }
