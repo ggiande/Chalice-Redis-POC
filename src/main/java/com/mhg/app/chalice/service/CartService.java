@@ -41,7 +41,8 @@ public class CartService {
     }
 
     public Cart get(String id) {
-        return cartRepository.findById(id).get();
+        Optional<Cart> optionalCart = cartRepository.findById(id);
+        return optionalCart.orElse(null);
     }
 
     public void addToCart(String id, CartItem item) {
